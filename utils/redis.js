@@ -11,7 +11,7 @@ class RedisClient {
     if (this.client) {
       return true;
     }
-    return this.client;
+    return false;
   }
 
   async get(key) {
