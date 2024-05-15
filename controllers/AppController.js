@@ -1,6 +1,6 @@
-import './server';
-import dbClient from './utils/db';
-import redisClient from './utils/redis';
+import '../server';
+import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
 
 const setup = (app) => {
   app.get('/status', (req, res) => {
