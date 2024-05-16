@@ -9,5 +9,5 @@ exports.getStatus = (req, res) => {
 exports.getStats = async (req, res) => {
   const users = await dbClient.nbUsers();
   const files = await dbClient.nbFiles();
-  res.send({"users":users,"files":files});
+  res.send({ users, files });
 };
