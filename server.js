@@ -1,5 +1,4 @@
 require('dotenv').config('./.env');
-// const setup = require('./controllers/AppController');
 const express = require('express');
 
 const app = express();
@@ -12,10 +11,6 @@ const port = process.env.PORT || 5000;
   if (controller.setup) {
     controller.setup(app);
   }
-  // eslint error
-  // https://github.com/import-js/eslint-plugin-import/issues/895
-  // no-dynamic-require cannot be disabled #895
-  // return (controller.setup(app));
 });
 app.listen(port, hostname, () => {
   console.log(`Server running on port ${port}`);
@@ -24,6 +19,3 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 module.exports = app;
-// https://stackoverflow.com/questions/36558909/route-get-requires-callback-functions-but-got-a-object-undefined
-// https://stackoverflow.com/questions/6140412/how-to-export-all-routes-in-express
-// https://stackoverflow.com/questions/73253638/how-to-export-redis-in-nodejs-to-different-routes
