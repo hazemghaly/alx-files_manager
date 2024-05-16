@@ -1,41 +1,21 @@
 import '../server';
-import bodyParser from 'body-parser';
-import crypto from 'crypto';
-import mongoose from 'mongoose';
 import dbClient from '../utils/db';
+import { sha1 } from '../node_modules/sha1';
 
-mongoose
-  .connect(dbClient.url, { useNewUrlParser: true, useUnifiedTopology: true });
-
-const userSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-});
-const setup = (app) => {
-  app.use(bodyParser.json());
-  app.post('/users', async (req, res) => {
-    const { email, password } = req.body;
-    const secretKey = '';
-    const concatenated = req.body.password + secretKey;
-    const securedpassword = crypto.createHash('SHA1').update(concatenated).digest('hex');
-    if (!email) {
-      return res.status(400).send('{"error":"Missing email"}');
+exports.postNew = async (req, res) => {
+    if (req.email && req.password && dbClient.isAlive()) {
+        const collection = dbClient.db(dbClient.database).collection('users');
+        if (!req.email){
+            res.status(400).send({"error":"Missing email"});
+        }
+        if (!req.password) {
+            res.status(400).send({"error":"Missing password"});
+        }
+        if (await collection.findOne({email: req.email})) {
+            res.status(400).send({"error":"Already exist"})
+        }
+        new_user = await collection.insertOne({ "email": req.email , "password": sha1(req.password)})
+        console.log(new_user)
+        res.status(201).send('HI')
     }
-    if (!password) {
-      return res.status(400).send('{"error":"Missing password"}');
-    }
-    const User = mongoose.model('User', userSchema);
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).send('{"error":"Already exist"}');
-    }
-    const newuser = new User({
-      email,
-      password: securedpassword,
-    });
-    await newuser.save();
-    return res.status(201).send({ id: newuser.id, email: newuser.email });
-  });
 };
-
-module.exports = { setup };
