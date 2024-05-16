@@ -4,11 +4,7 @@ import redisClient from '../utils/redis';
 
 const setup = (app) => {
   app.get('/status', (req, res) => {
-    if (redisClient.isAlive() && dbClient.isAlive()) {
-      res.status(200).send('{ "redis": true,"db": true }');
-    } else {
-      res.status(500).send(Error, `not connected : ${Error}`);
-    }
+    res.status(200).send({ "redis": redisClient.isAlive(),"db": dbClient.isAlive() });
   });
   app.get('/stats', async (req, res) => {
     const users = await dbClient.nbUsers();
