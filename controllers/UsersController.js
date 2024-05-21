@@ -1,40 +1,26 @@
-import mongoose from 'mongoose';
-// import sha1 from 'sha1';
-// import '../server';
-import crypto from 'crypto';
-import { sha1 } from '../node_modules/sha1';
+import sha1 from 'sha1';
 import dbClient from '../utils/db';
-import '../server';
 
-mongoose
-  .connect(dbClient.url, { useNewUrlParser: true, useUnifiedTopology: true });
-const UserSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-});
-const User = mongoose.model('User', UserSchema);
-
-const postNew = async (req, res) => {
-  const { email, password } = req.body;
-  const secretKey = '';
-  const concatenated = req.password + secretKey;
-  const securedpassword = crypto.createHash('SHA1').update(concatenated).digest('hex');
-  if (!email) {
-    return res.status(400).send('{"error":"Missing email"}');
+class UsersController {
+  static async postNew(request, response) {
+    const { email, password } = request.body;
+    if (!email) {
+      return response.status(400).send('{"error":"Missing email"}');
+    }
+    if (!password) {
+      return response.status(400).send('{"error":"Missing password"}');
+    }
+    const hashPwd = sha1(password);
+    const collection = dbClient.client.db(dbClient.database).collection('users');
+    const user1 = await collection.findOne({ email });
+    if (user1) {
+      response.status(400).json({ error: 'Already exist' });
+    }
+    collection.insertOne({ email, password: hashPwd });
+    const newUser = await collection.findOne(
+      { email }, { projection: { email: 1 } },
+    );
+    return response.status(201).json({ id: newUser._id, email: newUser.email });
   }
-  if (!password) {
-    return res.status(400).send('{"error":"Missing password"}');
-  }
-  const existingUser = await User.findOne({ email: req.email });
-  if (existingUser) {
-    return res.status(400).send('{"error":"Already exist"}');
-  }
-  const newuser = new User({
-    email,
-    password: securedpassword,
-  });
-  await newuser.save();
-  console.log(newuser.email);
-  return res.status(201).send({ id: newuser.id, email: newuser.email });
-};
-module.exports = { postNew };
+}
+module.exports = UsersController;
