@@ -14,7 +14,7 @@ class UsersController {
     const collection = dbClient.client.db(dbClient.database).collection('users');
     const user1 = await collection.findOne({ email });
     if (user1) {
-      response.status(400).send('{"error":"Already exist"}');
+      response.status(400).json({ error: 'Already exist' });
     }
     collection.insertOne({ email, password: hashPwd });
     const newUser = await collection.findOne(
